@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>大圣破阵录 · WUKONG: CELESTIAL SHATTER | Aholo 3D AI Hackathon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="./assets/index-BRwZ64jQ.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DXio4wXG.css">
+  </head>
+  <body>
+    <canvas id="game-canvas"></canvas>
+  <div class="eva-overlay"></div>
+
+    <!-- Opening Mythic Title Gate -->
+    <div id="title-screen" class="title-screen">
+      <div class="title-backdrop-glow"></div>
+      <div class="title-card">
+        <div class="aholo-badge">2026 群核 Aholo 空间智能黑客松 · Lux3D 骨骼动作 + SpatialGen 3DGS 原生动作游戏</div>
+        <h1 class="myth-logo">大圣破阵录</h1>
+        <p class="myth-sub">WUKONG · CELESTIAL SHATTER</p>
+        <p class="myth-poem">
+          身披锁子黄金甲，手执如意金箍棒。<br />
+          踏花果灵泉、扇八百里火焰、破南天凌霄妖阵！
+        </p>
+
+        <div class="feature-pills">
+          <span>定身奇术 · 毫毛分身</span>
+          <span>芭蕉熄火 · 筋斗腾云</span>
+          <span>幻影闪身 · 蓄力劈棍</span>
+          <span>三回西游神话 Boss 战</span>
+        </div>
+
+        <button id="btn-start-game" class="btn-gold-seal">披挂上阵 · 踏入西游</button>
+        <div class="controls-mini">
+          WASD 移动 · 左键轻棍 · 右键重劈 · Shift 闪身 · 1–4 神通 · Q 锁定 · R 饮酒 · M 静音
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Action HUD -->
+    <div id="hud" class="hud hidden">
+      <!-- Top Bar: Chapters + Objective + Tools -->
+      <header class="hud-top">
+        <div class="chapter-nav">
+          <button class="chap-btn active" data-chap="0">花果山 · 灵脉之战</button>
+          <span class="v2-tag">V2 / ONE BOSS</span>
+        </div>
+
+        <div class="quest-scroll">
+          <span class="quest-tag" id="hud-chap-code">第一回</span>
+          <span class="quest-text" id="hud-objective">击败巡山妖卒与「混世魔先锋」</span>
+        </div>
+
+        <div class="hud-tools">
+          <button id="btn-tech" class="tool-btn" title="查看群核 Aholo 3D AI 资产溯源">Aholo 溯源</button>
+          <button id="btn-mute" class="tool-btn">声音：开</button>
+        </div>
+      </header>
+
+      <!-- Top-Center Boss Health Bar -->
+      <div id="boss-hud" class="boss-hud hidden">
+        <div class="boss-header">
+          <span id="boss-name" class="boss-name">混世魔先锋</span>
+          <span id="boss-title" class="boss-title">水帘洞妖统领</span>
+          <span id="boss-phase-tag" class="boss-phase-tag hidden">法天象地 · 狂暴二阶段</span>
+        </div>
+        <div class="boss-bar-outer">
+          <div id="boss-bar-fill" class="boss-bar-fill"></div>
+        </div>
+        <div class="boss-posture-outer"><div id="boss-posture-fill" class="boss-posture-fill"></div></div>
+      </div>
+
+      <!-- Center Chapter Intro Calligraphic Banner -->
+      <div id="chapter-banner" class="chapter-banner hidden">
+        <div class="banner-code" id="banner-code">第一回</div>
+        <div class="banner-title" id="banner-title">花果山 · 水帘寻针</div>
+        <div class="banner-poem" id="banner-poem"></div>
+      </div>
+
+      <!-- Center Combat Callout Toast (Perfect Dodge / Ding-Shen / Fire Extinguished) -->
+      <div id="combat-toast" class="combat-toast"></div>
+
+      <div id="boss-intro" class="boss-intro hidden">
+        <div class="bi-kicker">HUA GUO SHAN // BOSS ENCOUNTER</div>
+        <div class="bi-rule"></div>
+        <h1 id="bi-name" class="bi-name">混世魔先锋</h1>
+        <p id="bi-title" class="bi-title">水帘洞妖统领</p>
+        <div class="bi-bottom">LUX3D ARENA // NO RETREAT</div>
+      </div>
+
+      <div id="chapter-loading" class="chapter-loading hidden"><div class="cl-k">AHOLO SPATIALGEN · 3DGS</div><div class="cl-t">正在展开花果山</div></div>
+      <div id="hit-flash" class="hit-flash"></div>
+      <div id="combo-hud" class="combo-hud hidden"><b id="combo-count">0</b><span>连击</span></div>
+      <div id="story-sub" class="story-sub hidden"></div>
+      <div id="low-hp" class="low-hp"></div>
+
+      <div id="root-hud" class="root-hud" style="left:24px;top:82px;transform:none">
+        <span class="root-label">六根 <b id="roots-count">0</b><em>/6</em></span>
+        <div class="karma-track"><i id="karma-fill"></i></div>
+        <span class="karma-label" id="karma-label">业障 0</span>
+      </div>
+
+      <!-- Bottom HUD: Player Vitals & Focus Beans (Left) + 4 Spells & Stances (Right) -->
+      <footer class="hud-bottom">
+        <div class="vitals-panel">
+          <div class="gourd-row">
+            <button id="btn-gourd" class="gourd-btn" title="按 [R] 饮用猴儿酒恢复气血">
+              <span class="gourd-key">R</span>
+              <span class="gourd-icon">葫芦</span>
+              <span id="gourd-charges" class="gourd-count">×3</span>
+            </button>
+
+            <div class="bars-col">
+              <div class="vital-line">
+                <span class="vital-label">气血</span>
+                <div class="vital-track hp-track">
+                  <div id="hp-fill" class="vital-fill hp-fill"></div>
+                </div>
+                <span id="hp-num" class="vital-num">300/300</span>
+              </div>
+              <div class="vital-line">
+                <span class="vital-label">法力</span>
+                <div class="vital-track mp-track">
+                  <div id="mp-fill" class="vital-fill mp-fill"></div>
+                </div>
+                <span id="mp-num" class="vital-num">100/100</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Focus Beans (棍势豆) -->
+          <div class="focus-row">
+            <span class="focus-title">棍势</span>
+            <div class="focus-beans">
+              <span class="bean" id="bean-1"></span>
+              <span class="bean" id="bean-2"></span>
+              <span class="bean" id="bean-3"></span>
+            </div>
+            <div class="focus-bar-mini">
+              <div id="focus-sub-fill" class="focus-sub-fill"></div>
+            </div>
+            <span class="focus-hint">右键 / K 消耗棍势释放「擎天劈棍」</span>
+          </div>
+        </div>
+
+        <!-- Right: 4 Iconic Wukong Spells + Martial Inputs -->
+        <div class="spells-panel">
+          <div class="spells-grid">
+            <button class="spell-slot" id="spell-1" data-spell="1">
+              <span class="spell-key">1</span>
+              <span class="spell-glyph">定</span>
+              <span class="spell-name">定身术</span>
+              <div class="spell-cd" id="cd-1"></div>
+            </button>
+            <button class="spell-slot" id="spell-2" data-spell="2">
+              <span class="spell-key">2</span>
+              <span class="spell-glyph">毛</span>
+              <span class="spell-name">身外身</span>
+              <div class="spell-cd" id="cd-2"></div>
+            </button>
+            <button class="spell-slot" id="spell-3" data-spell="3">
+              <span class="spell-key">3</span>
+              <span class="spell-glyph">扇</span>
+              <span class="spell-name">芭蕉扇</span>
+              <div class="spell-cd" id="cd-3"></div>
+            </button>
+            <button class="spell-slot" id="spell-4" data-spell="4">
+              <span class="spell-key">4</span>
+              <span class="spell-glyph">云</span>
+              <span class="spell-name">筋斗云</span>
+            </button>
+          </div>
+          <div class="martial-strip">
+            <span><b>左键 / J</b> 轻棍三连</span>
+            <span><b>右键 / K</b> 蓄力劈棍</span>
+            <span><b>Shift</b> 幻影闪身(完美闪避触发子弹时间)</span>
+            <span><b>Space</b> 腾跃</span>
+            <span><b>Q / Tab</b> 锁定敌人</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Chapter Victory / Game Complete Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div id="modal-tag" class="modal-tag">妖阵已破</div>
+        <h2 id="modal-title" class="modal-title">第一回 · 功德圆满</h2>
+        <p id="modal-desc" class="modal-desc"></p>
+        <div class="modal-actions">
+          <button id="btn-modal-action" class="btn-gold-seal">前往下一回</button>
+          <button id="btn-modal-alt" class="btn-gold-seal alt hidden">吞噬 · 收下</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause / Settings -->
+    <div id="pause-overlay" class="pause-overlay hidden">
+      <div class="pause-card">
+        <div class="pause-kicker">PAUSED // SPIRIT SYNC INTERRUPTED</div>
+        <h2 class="pause-title">暂停</h2>
+        <p class="pause-desc">灵脉同步已中断。调整后继续西行。</p>
+        <div class="pause-actions">
+          <button id="btn-pause-resume" class="btn-gold-seal">继续 · RESUME</button>
+          <button id="btn-pause-sound" class="btn-gold-seal alt">声音：开</button>
+          <button id="btn-pause-restart" class="btn-gold-seal alt">重开本回</button>
+        </div>
+        <div class="pause-controls">WASD 移动 · 左键轻棍 · 右键重劈 · Shift 闪身 · Q 锁定 · Esc 暂停</div>
+      </div>
+    </div>
+
+    <!-- Aholo Tech Stack Provenance Drawer -->
+    <aside id="tech-drawer" class="tech-drawer hidden">
+      <div class="drawer-head">
+        <h3>群核 Aholo 空间智能全链路资产溯源</h3>
+        <button id="btn-close-tech" class="close-btn">✕</button>
+      </div>
+      <p class="drawer-note">
+        本作 100% 核心角色、西游神兵地标、骨骼绑定与 3DGS 全景世界均由群核 Aholo OpenAPI 生成并本地化烘培，运行时零算力消耗、零密钥暴露：
+      </p>
+      <ul class="tech-list">
+        <li><b>齐天大圣孙悟空 PBR + 绑骨 + 6套战斗动作重定向</b> · Lux3D <code>8258546</code> → Rig <code>8270067</code> → Retarget <code>8271499</code></li>
+        <li><b>平天大圣牛魔王 Boss + 绑骨 + 4套狂暴动作重定向</b> · Lux3D <code>8258552</code> → Rig <code>8270068</code> → Retarget <code>8271516</code></li>
+        <li><b>配乐：Asian Drums — Kevin MacLeod (incompetech.com) · CC BY 4.0<br>花果山水帘洞 3DGS 空间世界</b> · SpatialGen <code>worldId: 3FO4K4REIA5U</code> (<code>huaguoshan.spz</code>)</li>
+        <li><b>火焰山大漠熔岩 3DGS 空间世界</b> · SpatialGen <code>worldId: 3FO4K4REKDPH</code> (<code>desert_ruin.spz</code>)</li>
+        <li><b>南天门凌霄仙阙 3DGS 空间世界</b> · SpatialGen <code>worldId: 3FO4K4REK0CD</code> (<code>lingxiao_palace.spz</code>)</li>
+        <li><b>南天门玉阙牌楼 / 定海神针 / 芭蕉宝扇 / 巡山妖卫</b> · Lux3D <code>8258194 / 8270072 / 8270076 / 8270069</code></li>
+        <li><b>烛龙赤炎统领 / 饕餮混世魔 / 扶桑神树 / 白泽天卫</b> · Lux3D <code>8258178 / 8258189 / 8258174 / 8258184</code></li>
+      </ul>
+    </aside>
+
+  </body>
+</html>
